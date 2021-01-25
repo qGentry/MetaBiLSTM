@@ -88,7 +88,7 @@ class Trainer:
     def accumulate_train_metrics(self, batch_metrics):
         for metric in self.train_metrics:
             for model_name in self.model_names:
-                self.train_metrics[metric][model_name].append(batch_metrics[metric][model_name])
+                self.train_metrics[metric][model_name].append(batch_metrics[metric][model_name].detach().item())
 
     @staticmethod
     def get_empty_metrics():
