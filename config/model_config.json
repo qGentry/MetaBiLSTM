@@ -1,5 +1,5 @@
 {
-    "meta_model_params" : {
+    "meta_model_params": {
         "input_size": 512,
         "hidden_dim": 512,
         "num_layers": 1,
@@ -10,7 +10,7 @@
         "mlp_proj_size": 256,
         "num_layers": 1,
         "dropout": 0.0,
-        "pretrained_embs_path": "data/embeddings/model.txt"
+        "pretrained_embs_path": "data/embeddings/skip_s300.txt"
     },
     "char_model_params": {
         "emb_dim": 100,

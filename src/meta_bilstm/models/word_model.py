@@ -90,7 +90,7 @@ class WordEmbeddingLayer(nn.Module):
         multis = defaultdict(lambda: 1)
         for line in tqdm(embs):
             word, *vec = line.split(' ')
-            word, _ = word.split("_")
+            # word, _ = word.split("_")
             vec = torch.FloatTensor(list(map(float, vec)))
             if word not in token_to_idx:
                 token_to_idx[word] = i
