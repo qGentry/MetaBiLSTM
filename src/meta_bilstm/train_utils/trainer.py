@@ -182,6 +182,6 @@ class Trainer:
         for metric in metrics:
             for model_name in self.model_names:
                 metrics[metric][model_name] = sum(metrics[metric][model_name]) / len(
-                    sum(metrics[metric][model_name])
+                    metrics[metric][model_name]
                 )
         return metrics
