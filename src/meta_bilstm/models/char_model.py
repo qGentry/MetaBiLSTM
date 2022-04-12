@@ -46,7 +46,7 @@ class CharBiLSTM(nn.Module):
 
     def forward(self, x):
         inds, lens = x
-        inds, lens = inds.to(self.device), lens.to(self.device)
+        inds, lens = inds.to(self.device), lens.to("cpu")
         embedded = self.emb_layer(inds)
         packed = torch.nn.utils.rnn.pack_padded_sequence(
             embedded,

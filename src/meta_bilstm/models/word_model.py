@@ -6,13 +6,10 @@ from tqdm import tqdm
 
 
 class WordPretrainedEmbbedings(nn.Module):
-
     def __init__(self, embeddings):
         super().__init__()
         self.emb_layer = nn.Embedding.from_pretrained(
-            embeddings=embeddings,
-            freeze=True,
-            padding_idx=0
+            embeddings=embeddings, freeze=True, padding_idx=0
         )
 
     def forward(self, x):
@@ -20,7 +17,6 @@ class WordPretrainedEmbbedings(nn.Module):
 
 
 class WordTrainableEmbeddings(nn.Module):
-
     def __init__(self, num_embeddings, embedding_dim):
         super().__init__()
         self.emb_layer = nn.Embedding(
@@ -34,7 +30,6 @@ class WordTrainableEmbeddings(nn.Module):
 
 
 class WordEmbeddingLayer(nn.Module):
-
     def __init__(self, dataset, pretrained_path):
         super().__init__()
         emb_tensor, token_to_idx, idx_to_token = self.read_embeddings(pretrained_path)
@@ -44,10 +39,14 @@ class WordEmbeddingLayer(nn.Module):
         self.idx_to_token = idx_to_token
 
         new_words_count = self.update_token_to_idx_vocab(dataset)
-        emb_tensor = torch.cat([emb_tensor, *[torch.zeros(1, emb_dim) for _ in range(new_words_count)]])
+        emb_tensor = torch.cat(
+            [emb_tensor, *[torch.zeros(1, emb_dim) for _ in range(new_words_count)]]
+        )
 
         self.pretrained_embs = WordPretrainedEmbbedings(emb_tensor)
-        self.trainable_embs = WordTrainableEmbeddings(num_emb + new_words_count, emb_dim)
+        self.trainable_embs = WordTrainableEmbeddings(
+            num_emb + new_words_count, emb_dim
+        )
 
     def update_token_to_idx_vocab(self, dataset):
         dataset_vocab = self.build_vocab(dataset)
@@ -55,12 +54,8 @@ class WordEmbeddingLayer(nn.Module):
         intersect_vocab = set.difference(dataset_vocab, emb_vocab)
 
         shift = len(self.token_to_idx)
-        spec_token_to_idx = {
-            word: i + shift for i, word in enumerate(intersect_vocab)
-        }
-        spec_idx_to_token = {
-            i + shift: word for i, word in enumerate(intersect_vocab)
-        }
+        spec_token_to_idx = {word: i + shift for i, word in enumerate(intersect_vocab)}
+        spec_idx_to_token = {i + shift: word for i, word in enumerate(intersect_vocab)}
         self.token_to_idx = {**self.token_to_idx, **spec_token_to_idx}
         self.idx_to_token = {**self.idx_to_token, **spec_idx_to_token}
         return len(intersect_vocab)
@@ -83,13 +78,13 @@ class WordEmbeddingLayer(nn.Module):
             for line in f:
                 embs.append(line)
         embs = embs[1:]
-        token_to_idx = {'<PAD>': 0, '<OOV>': 1}
-        idx_to_token = {0: '<PAD>', 1: "<OOV>"}
+        token_to_idx = {"<PAD>": 0, "<OOV>": 1}
+        idx_to_token = {0: "<PAD>", 1: "<OOV>"}
         i = 2
         list_embs = [torch.FloatTensor([0] * 300), torch.FloatTensor([0] * 300)]
         multis = defaultdict(lambda: 1)
         for line in tqdm(embs):
-            word, *vec = line.split(' ')
+            word, *vec = line.split(" ")
             # word, _ = word.split("_")
             vec = torch.FloatTensor(list(map(float, vec)))
             if word not in token_to_idx:
@@ -106,17 +101,17 @@ class WordEmbeddingLayer(nn.Module):
 
 
 class WordBiLSTM(nn.Module):
-
-    def __init__(self,
-                 hidden_dim,
-                 dataset,
-                 output_proj_size,
-                 device,
-                 mlp_proj_size,
-                 num_layers,
-                 dropout,
-                 pretrained_embs_path,
-                 ):
+    def __init__(
+        self,
+        hidden_dim,
+        dataset,
+        output_proj_size,
+        device,
+        mlp_proj_size,
+        num_layers,
+        dropout,
+        pretrained_embs_path,
+    ):
         super().__init__()
         self.device = device
         self.emb_layer = WordEmbeddingLayer(dataset, pretrained_embs_path)
@@ -136,13 +131,10 @@ class WordBiLSTM(nn.Module):
 
     def forward(self, x):
         inds, lens = x
-        inds, lens = inds.to(self.device), lens.to(self.device)
+        inds, lens = inds.to(self.device), lens.to("cpu")
         embedded = self.emb_layer(inds)
         packed = torch.nn.utils.rnn.pack_padded_sequence(
-            embedded,
-            lengths=lens,
-            batch_first=True,
-            enforce_sorted=False
+            embedded, lengths=lens, batch_first=True, enforce_sorted=False
         )
 
         output, _ = self.rnn(packed, self.get_initial_state(inds))
