@@ -21,13 +21,19 @@ def main():
     parser.add_argument(
         "--train-data", "-t",
         type=str,
-        default="data/ru_syntagrus-ud-train.conllu",
+        default="data/porttinari-base-train.conllu",
+        help="path to training data in conllu format"
+    )
+    parser.add_argument(
+        "--test-data", "-v",
+        type=str,
+        default="data/porttinari-base-test.conllu",
         help="path to training data in conllu format"
     )
     parser.add_argument(
         "--device", "-d",
         type=str,
-        default="cpu",
+        default="cuda",
         help="device to use for model training/inference",
     )
     args = parser.parse_args()
@@ -35,7 +41,7 @@ def main():
     with open(args.config_path, 'r') as f:
         model_config = json.load(f)
 
-    trainer = Trainer(model_config, args.device, args.train_data)
+    trainer = Trainer(model_config, args.device, args.train_data, args.test_data)
     trainer.train_model(5)
 
 

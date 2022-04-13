@@ -15,12 +15,13 @@ class Trainer:
         model_config: dict,
         device: str,
         data_path: str,
+        test_path: str,
         batch_size: int = 32,
-        test_size: float = 0.25,
+        test_size: float = 0,
         model_names=("word", "char", "meta"),
     ):
 
-        data = self.read_and_parse_data_from_path(data_path, test_size)
+        data = self.read_and_parse_data_from_path(data_path, test_path, test_size)
         print(model_config)
         for model_name in model_config:
             model_config[model_name]["output_proj_size"] = len(
@@ -57,9 +58,9 @@ class Trainer:
         }
 
     @staticmethod
-    def read_and_parse_data_from_path(data_path, test_size):
+    def read_and_parse_data_from_path(data_path, test_path, test_size):
         preprocessor = Preprocessor(test_size)
-        data = preprocessor.get_train_test_list_datasets(data_path)
+        data = preprocessor.get_train_test_list_datasets(data_path, test_path)
         return data
 
     def train_model(

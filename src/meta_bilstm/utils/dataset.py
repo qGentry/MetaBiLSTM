@@ -19,11 +19,8 @@ class PosTagDataset(torch.utils.data.Dataset):
         for word, label in sentence:
             labels.append(label)
             pure_words.append(word)
-            if word in token_to_idx:
-                word_idx.append(token_to_idx[word])
-            else:
-                word_idx.append(token_to_idx['<OOV>'])
-        char_idx = [char_to_idx[char] for char in list('|'.join(pure_words))]
+            word_idx.append(token_to_idx.get(word, token_to_idx["unknown"]))
+        char_idx = [char_to_idx.get(char, char_to_idx["unknown"]) for char in list('|'.join(pure_words))]
         return {
             "word_idx": torch.LongTensor(word_idx),
             "char_idx": torch.LongTensor(char_idx),
