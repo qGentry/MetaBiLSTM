@@ -2,7 +2,6 @@ import torch
 
 
 class PosTagDataset(torch.utils.data.Dataset):
-
     def __init__(self, list_dataset, token_to_idx, char_to_idx):
         self.token_to_idx = token_to_idx
         self.char_to_idx = char_to_idx
@@ -20,11 +19,14 @@ class PosTagDataset(torch.utils.data.Dataset):
             labels.append(label)
             pure_words.append(word)
             word_idx.append(token_to_idx.get(word, token_to_idx["unknown"]))
-        char_idx = [char_to_idx.get(char, char_to_idx["unknown"]) for char in list('|'.join(pure_words))]
+        char_idx = [
+            char_to_idx.get(char, char_to_idx["unknown"])
+            for char in list("☕".join(pure_words))
+        ]
         return {
             "word_idx": torch.LongTensor(word_idx),
             "char_idx": torch.LongTensor(char_idx),
-            "labels": torch.LongTensor(labels)
+            "labels": torch.LongTensor(labels),
         }
 
     def __getitem__(self, idx):
@@ -38,11 +40,11 @@ def _collate_fn(data_list):
     char_idx_lens = []
     labels_batch = []
     for data_point in data_list:
-        labels_batch.append(data_point['labels'])
-        word_idx_batch.append(data_point['word_idx'])
-        word_idx_lens.append(len(data_point['word_idx']))
-        char_idx_batch.append(data_point['char_idx'])
-        char_idx_lens.append(len(data_point['char_idx']))
+        labels_batch.append(data_point["labels"])
+        word_idx_batch.append(data_point["word_idx"])
+        word_idx_lens.append(len(data_point["word_idx"]))
+        char_idx_batch.append(data_point["char_idx"])
+        char_idx_lens.append(len(data_point["char_idx"]))
     return {
         "word_idx": [
             torch.nn.utils.rnn.pad_sequence(word_idx_batch, batch_first=True),
@@ -52,7 +54,7 @@ def _collate_fn(data_list):
             torch.nn.utils.rnn.pad_sequence(char_idx_batch, batch_first=True),
             torch.LongTensor(char_idx_lens),
         ],
-        'labels': torch.nn.utils.rnn.pad_sequence(labels_batch, batch_first=True)
+        "labels": torch.nn.utils.rnn.pad_sequence(labels_batch, batch_first=True),
     }
 
 
